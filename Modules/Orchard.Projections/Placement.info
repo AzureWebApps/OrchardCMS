@@ -1,0 +1,13 @@
+﻿<Placement>
+  <Place Parts_ProjectionPart_Edit="Content:5"/>
+  <Place Parts_ProjectionPart="Content:5"/>
+
+  <Match DisplayType="Detail" ContentType="ProjectionPage">
+    <Place Parts_Common_Metadata="-" />
+  </Match>
+
+  <Match DisplayType="SummaryAdmin">
+    <Place Parts_ProjectionPart="-" />
+  </Match>
+
+</Placement>

@@ -1,0 +1,69 @@
+﻿@model NavigationManagementViewModel
+@using Orchard.ContentManagement;
+@using Orchard.Core.Navigation.Models;
+@using Orchard.Core.Navigation.ViewModels;
+
+@{ Layout.Title = T("Navigation").ToString(); }
+
+@using (Html.BeginFormAntiForgeryPost()) {
+<table class="items">
+    <colgroup>
+        <col id="Text" />
+        <col id="Position" />
+        <col id="Url" />
+        <col id="Actions" />
+    </colgroup>
+    <thead>
+        <tr>
+            <td scope="col">@T("Text")</td>
+            <td scope="col">@T("Position")</td>
+            <td scope="col">@T("Url")</td>
+            <td scope="col"></td>
+        </tr>
+    </thead>
+    <tbody>@{ 
+        var menuPartEntryIndex = 0;
+        foreach (var menuPartEntry in Model.MenuItemEntries) {
+            var i = menuPartEntryIndex;
+            <tr>
+                <td><input type="text" class="text-box" name="@Html.NameOf(m => m.MenuItemEntries[i].Text)" value="@menuPartEntry.Text" /></td>
+                <td><input type="text" class="text-box" name="@Html.NameOf(m => m.MenuItemEntries[i].Position)" value="@menuPartEntry.Position" /></td>
+                <td>@if (!menuPartEntry.IsMenuItem) {<input type="text" class="text-box disabled" disabled="disabled" value="@menuPartEntry.Url" /> } else {<input type="text" class="text-box" name="@Html.NameOf(m => m.MenuItemEntries[i].Url)" value="@menuPartEntry.Url" />}</td>
+                <td><input type="hidden" name="@Html.NameOf(m => m.MenuItemEntries[i].MenuItemId)" value="@menuPartEntry.MenuItemId" />@Html.ActionLink(T("Delete").Text, "Delete", new { id = menuPartEntry.MenuItemId }, new { @class="remove", itemprop="RemoveUrl UnsafeUrl" })</td>
+            </tr>
+            ++menuPartEntryIndex;
+        }
+    }
+    </tbody>
+</table>
+<fieldset class="actions"><button type="submit" class="button">@T("Update All")</button></fieldset>
+}
+
+<h2>@T("Add New Item")</h2>
+@using (Html.BeginFormAntiForgeryPost(Url.Action("create"), FormMethod.Post)) {
+<table class="menu items">
+    <colgroup>
+        <col id="AddText" />
+        <col id="AddPosition" />
+        <col id="AddUrl" />
+        <col id="AddActions" />
+    </colgroup>
+    <tbody>
+        <tr>
+            <td>
+                <label for="MenuText">@T("Text")</label>
+                @Html.EditorFor(m => m.NewMenuItem.Text)
+            </td>
+            <td>
+                <label for="MenuPosition">@T("Position")</label>
+                @Html.EditorFor(m => m.NewMenuItem.Position)
+            </td>
+            <td>
+                <label for="Url">@T("Url")</label>
+                @Html.EditorFor(m => m.NewMenuItem.Url)
+            </td>
+            <td><button class="add" type="submit">@T("Add")</button></td>
+        </tr>
+    </tbody>
+</table>
+}
