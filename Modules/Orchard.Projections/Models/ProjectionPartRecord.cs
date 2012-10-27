@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Orchard.ContentManagement.Records;
+using Orchard.Data.Conventions;
 
 namespace Orchard.Projections.Models {
     public class ProjectionPartRecord : ContentPartRecord {
@@ -25,7 +26,7 @@ namespace Orchard.Projections.Models {
         /// <summary>
         /// Suffix to use when multiple pagers are available on the same page
         /// </summary>
-        [StringLength(16)]
+        [StringLength(255)]
         public virtual string PagerSuffix { get; set; }
 
         /// <summary>
@@ -41,11 +42,13 @@ namespace Orchard.Projections.Models {
         /// <summary>
         /// The query to execute
         /// </summary>
+        [Aggregate]
         public virtual QueryPartRecord QueryPartRecord { get; set; }
 
         /// <summary>
         /// The layout to render
         /// </summary>
+        [Aggregate]
         public virtual LayoutRecord LayoutRecord { get; set; }
 
     }

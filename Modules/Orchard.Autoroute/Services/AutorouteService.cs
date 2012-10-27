@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Orchard.Alias;
 using Orchard.Autoroute.Models;
+using Orchard.Autoroute.Settings;
+using Orchard.ContentManagement;
+using Orchard.ContentManagement.MetaData;
 using Orchard.ContentManagement.MetaData.Models;
 using Orchard.Localization;
-using Orchard.Tokens;
-using Orchard.Autoroute.Settings;
-using Orchard.ContentManagement.MetaData;
 using Orchard.Logging;
-using Orchard.ContentManagement;
+using Orchard.Tokens;
 
 namespace Orchard.Autoroute.Services {
     public class AutorouteService : IAutorouteService {
@@ -20,6 +20,7 @@ namespace Orchard.Autoroute.Services {
         private readonly IContentDefinitionManager _contentDefinitionManager;
         private readonly IContentManager _contentManager;
         private readonly IRouteEvents _routeEvents;
+        private const string AliasSource = "Autoroute:View";
 
         public AutorouteService(
             IAliasService aliasService,
@@ -67,9 +68,8 @@ namespace Orchard.Autoroute.Services {
 
         public void PublishAlias(AutoroutePart part) {
             var displayRouteValues = _contentManager.GetItemMetadata(part).DisplayRouteValues;
-            var aliasSource = "Autoroute:View:" + part.Id;
 
-            _aliasService.Replace(part.DisplayAlias, displayRouteValues, aliasSource);
+            _aliasService.Replace(part.DisplayAlias, displayRouteValues, AliasSource);
 
             _routeEvents.Routed(part, part.DisplayAlias);
         }
@@ -112,15 +112,17 @@ namespace Orchard.Autoroute.Services {
 
         public RoutePattern GetDefaultPattern(string contentType) {
             var settings = GetTypePartSettings(contentType).GetModel<AutorouteSettings>();
-            return settings.Patterns.ElementAt(settings.DefaultPatternIndex);
+
+            // return a default pattern if none is defined
+            if(settings.DefaultPatternIndex < settings.Patterns.Count) {
+                return settings.Patterns.ElementAt(settings.DefaultPatternIndex);    
+            }
+
+            return new RoutePattern {Name = "Title", Description = "my-title", Pattern = "{Content.Slug}"};
         }
 
         public void RemoveAliases(AutoroutePart part) {
-            
-            // todo: remove all aliases for this part
-
-            var aliasSource = "Autoroute:View:" + part.Id;
-            _aliasService.DeleteBySource(aliasSource);
+            _aliasService.Delete(part.Path, AliasSource);
         }
 
         private SettingsDictionary GetTypePartSettings(string contentType) {
@@ -164,16 +166,16 @@ namespace Orchard.Autoroute.Services {
         }
 
         public bool IsPathValid(string slug) {
-            return String.IsNullOrWhiteSpace(slug) || Regex.IsMatch(slug, @"^[^:?#\[\]@!$&'()*+,;=\s\""\<\>\\]+$") && !(slug.StartsWith(".") || slug.EndsWith("."));
+            return String.IsNullOrWhiteSpace(slug) || Regex.IsMatch(slug, @"^[^:?#\[\]@!$&'()*+,;=\s\""\<\>\\\|]+$") && !(slug.StartsWith(".") || slug.EndsWith("."));
         }
 
         public bool ProcessPath(AutoroutePart part) {
 
-            var pathsLikeThis = GetSimilarPaths(part.Path);
+            var pathsLikeThis = GetSimilarPaths(part.Path).ToArray();
 
             // Don't include *this* part in the list
             // of slugs to consider for conflict detection
-            pathsLikeThis = pathsLikeThis.Where(p => p.ContentItem.Id != part.ContentItem.Id).ToList();
+            pathsLikeThis = pathsLikeThis.Where(p => p.ContentItem.Id != part.ContentItem.Id).ToArray();
 
             if (pathsLikeThis.Any()) {
                 var originalPath = part.Path;

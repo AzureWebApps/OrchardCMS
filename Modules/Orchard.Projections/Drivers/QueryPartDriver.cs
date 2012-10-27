@@ -73,7 +73,8 @@ namespace Orchard.Projections.Drivers {
         protected override void Importing(QueryPart part, ImportContentContext context) {
             var queryElement = context.Data.Element(part.PartDefinition.Name);
 
-            part.Record.FilterGroups = queryElement.Element("FilterGroups").Elements("FilterGroup").Select(filterGroup =>
+            part.Record.FilterGroups.Clear();
+            foreach(var item in queryElement.Element("FilterGroups").Elements("FilterGroup").Select(filterGroup =>
                 new FilterGroupRecord {
                     Filters = filterGroup.Elements("Filter").Select( filter =>
                         new FilterRecord {
@@ -83,9 +84,12 @@ namespace Orchard.Projections.Drivers {
                             State = filter.Attribute("State").Value,
                             Type = filter.Attribute("Type").Value
                         }).ToList()
-                }).ToList();
+                })) {
+                part.Record.FilterGroups.Add(item);
+            }
 
-            part.Record.SortCriteria = queryElement.Element("SortCriteria").Elements("SortCriterion").Select(sortCriterion =>
+            part.Record.SortCriteria.Clear();
+            foreach(var item in queryElement.Element("SortCriteria").Elements("SortCriterion").Select(sortCriterion =>
                 new SortCriterionRecord {
                     Category = sortCriterion.Attribute("Category").Value,
                     Description = sortCriterion.Attribute("Description").Value,
@@ -93,9 +97,12 @@ namespace Orchard.Projections.Drivers {
                     State = sortCriterion.Attribute("State").Value,
                     Type = sortCriterion.Attribute("Type").Value
 
-                }).ToList();
+                })) {
+                part.Record.SortCriteria.Add(item);
+            }
 
-            part.Record.Layouts = queryElement.Element("Layouts").Elements("Layout").Select(layout =>
+            part.Record.Layouts.Clear();
+            foreach(var item in queryElement.Element("Layouts").Elements("Layout").Select(layout =>
                 new LayoutRecord {
                     
                     Category = layout.Attribute("Category").Value,
@@ -106,7 +113,9 @@ namespace Orchard.Projections.Drivers {
                     Type = layout.Attribute("Type").Value,
                     Properties = layout.Element("Properties").Elements("Property").Select(GetProperty).ToList(),
                     GroupProperty = GetProperty(layout.Element("Group").Element("Property"))
-                }).ToList();
+                })) {
+                part.Record.Layouts.Add(item);
+            }
 
         }
 

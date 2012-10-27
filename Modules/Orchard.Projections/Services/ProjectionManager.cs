@@ -116,6 +116,10 @@ namespace Orchard.Projections.Services {
             // re-executing the sorting with the cumulated groups
             var ids = contentItems.Select(c => c.Id).ToArray();
 
+            if(ids.Length == 0) {
+                return Enumerable.Empty<ContentItem>();
+            }
+
             var groupQuery = _contentManager.HqlQuery().Where(alias => alias.Named("ci"), x => x.InG("Id", ids));
 
             // iterate over each sort criteria to apply the alterations to the query object

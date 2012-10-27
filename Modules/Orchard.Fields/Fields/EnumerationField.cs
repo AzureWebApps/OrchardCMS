@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Orchard.ContentManagement;
 using Orchard.ContentManagement.FieldStorage;
 
@@ -23,7 +22,12 @@ namespace Orchard.Fields.Fields {
             }
 
             set {
-                Value = Separator + string.Join(Separator.ToString(), value) + Separator;
+                if (value == null || value.Length == 0) {
+                    Value = String.Empty;
+                }
+                else {
+                    Value = Separator + string.Join(Separator.ToString(), value) + Separator;
+                }
             }
         }
     }

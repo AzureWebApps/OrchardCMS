@@ -72,7 +72,7 @@ namespace Orchard.Fields.Drivers {
                 Required = settings.Required
             };
 
-            return ContentShape("Fields_DateTime_Edit", // this is just a key in the Shape Table
+            return ContentShape("Fields_DateTime_Edit", GetDifferentiator(field, part),
                 () => shapeHelper.EditorTemplate(TemplateName: TemplateName, Model: viewModel, Prefix: GetPrefix(field, part))); 
         }
 
@@ -98,7 +98,13 @@ namespace Orchard.Fields.Drivers {
                     updater.AddModelError(GetPrefix(field, part), T("{0} is required", field.DisplayName));
                 }
 
-                if (DateTime.TryParse(parseDateTime, _cultureInfo.Value, DateTimeStyles.None, out value)) {
+                if(!settings.Required
+                    && (settings.Display != DateTimeFieldDisplays.TimeOnly && String.IsNullOrWhiteSpace(viewModel.Date))
+                    || (settings.Display != DateTimeFieldDisplays.DateOnly && String.IsNullOrWhiteSpace(viewModel.Time))
+                    ) {
+                        field.DateTime = DateTime.MinValue;
+                }
+                else if (DateTime.TryParse(parseDateTime, _cultureInfo.Value, DateTimeStyles.None, out value)) {
                     field.DateTime = TimeZoneInfo.ConvertTimeToUtc(value, Services.WorkContext.CurrentTimeZone);
                 }
                 else {

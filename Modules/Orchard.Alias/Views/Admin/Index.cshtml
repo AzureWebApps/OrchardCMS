@@ -57,7 +57,13 @@
         @foreach (var aliasEntry in Model.AliasEntries) {
             var alias = aliasEntry.Alias;
             index++;
-            var url = aliasService.LookupVirtualPaths(alias.RouteValues.ToRouteValueDictionary(), ViewContext.HttpContext).First().VirtualPath;
+            var virtualPathData = aliasService.LookupVirtualPaths(alias.RouteValues.ToRouteValueDictionary(), ViewContext.HttpContext).FirstOrDefault();
+            
+            if (virtualPathData == null) {
+                continue;
+            }
+            
+            var url = virtualPathData.VirtualPath;
             <tr>
                 <td>
                     <input type="hidden" value="@alias.Path" name="@Html.FieldNameFor(m => Model.AliasEntries[index].Alias.Path)"/>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Orchard.Rules.Models;
 using Orchard.Data;
@@ -30,6 +31,17 @@ namespace Orchard.Rules.Services {
 
         public RuleRecord GetRule(int id) {
             return _ruleRepository.Get(id);
+        }
+
+        public IEnumerable<RuleRecord> GetRules() {
+            return _ruleRepository.Table.ToList();
+        }
+
+        public void DeleteRule(int ruleId) {
+            var e = _ruleRepository.Get(ruleId);
+            if (e != null) {
+                _ruleRepository.Delete(e);
+            }
         }
 
         public void DeleteEvent(int eventId) {

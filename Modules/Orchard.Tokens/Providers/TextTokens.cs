@@ -16,6 +16,7 @@ namespace Orchard.Tokens.Providers {
                 .Token("Format:*", T("Format:<text format>"), T("Optional format specifier (e.g. foo{0}bar). See format strings at <a target=\"_blank\" href=\"http://msdn.microsoft.com/en-us/library/az4se3k1.aspx\">Standard Formats</a> and <a target=\"_blank\" href=\"http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx\">Custom Formats</a>"), "DateTime")
                 .Token("UrlEncode", T("Url Encode"), T("Encodes a URL string."), "Text")
                 .Token("HtmlEncode", T("Html Encode"), T("Encodes an HTML string."), "Text")
+                .Token("LineEncode", T("Line Encode"), T("Replaces new lines with <br /> tags."))
                 ;
         }
 
@@ -37,8 +38,9 @@ namespace Orchard.Tokens.Providers {
                 .Token(
                     token => token.StartsWith("Format:", StringComparison.OrdinalIgnoreCase) ? token.Substring("Format:".Length) : null,
                     (token, d) => String.Format(d,token))
-                .Token("UrlEncode", text => HttpUtility.UrlEncode(text))
-                .Token("HtmlEncode", text => HttpUtility.HtmlEncode(text))
+                .Token("UrlEncode", HttpUtility.UrlEncode)
+                .Token("HtmlEncode", HttpUtility.HtmlEncode)
+                .Token("LineEncode", text => text.Replace(System.Environment.NewLine, "<br />"))
                 ;
                 
         }

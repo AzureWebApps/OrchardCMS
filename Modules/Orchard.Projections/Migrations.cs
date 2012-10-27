@@ -1,4 +1,5 @@
-﻿using Orchard.ContentManagement.MetaData;
+﻿using System.Data;
+using Orchard.ContentManagement.MetaData;
 using Orchard.Core.Common.Models;
 using Orchard.Core.Contents.Extensions;
 using Orchard.Core.Title.Models;
@@ -157,7 +158,7 @@ namespace Orchard.Projections {
                     .Column<int>("Items")
                     .Column<int>("ItemsPerPage")
                     .Column<int>("Skip")
-                    .Column<string>("PagerSuffix", c => c.WithLength(16))
+                    .Column<string>("PagerSuffix", c => c.WithLength(255))
                     .Column<int>("MaxItems")
                     .Column<bool>("DisplayPager")
                     .Column<int>("QueryPartRecord_id")
@@ -240,6 +241,36 @@ namespace Orchard.Projections {
             });
 
             return 1;
+        }
+
+        public int UpdateFrom1() {
+            SchemaBuilder.CreateTable("NavigationQueryPartRecord",
+                table => table.ContentPartRecord()
+                    .Column<int>("Items")
+                    .Column<int>("Skip")
+                    .Column<int>("QueryPartRecord_id")
+                );
+
+            ContentDefinitionManager.AlterTypeDefinition("NavigationQueryMenuItem",
+                cfg => cfg
+                    .WithPart("NavigationQueryPart")
+                    .WithPart("MenuPart")
+                    .WithPart("CommonPart")
+                    .DisplayedAs("Query Link")
+                    .WithSetting("Description", "Injects menu items from a Query")
+                    .WithSetting("Stereotype", "MenuItem")
+                );
+
+            return 3;
+        }
+
+        public int UpdateFrom2() {
+            SchemaBuilder.AlterTable("ProjectionPartRecord",
+                            table => table
+                                .AlterColumn("PagerSuffix", c => c.WithType(DbType.String).WithLength(255))
+                            );
+
+            return 3;
         }
     }
 }

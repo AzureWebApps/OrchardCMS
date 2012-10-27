@@ -32,7 +32,7 @@ namespace Orchard.Projections.Providers.Layouts {
                             _ValueFalse: Shape.Radio(
                                 Id: "vertical", Name: "Alignment",
                                 Title: T("Vertical"), Value: "vertical",
-                                Description: T("Vertical alignment will place items starting in the upper left and moving dowmn.")
+                                Description: T("Vertical alignment will place items starting in the upper left and moving down.")
                                 ),
                             _Colums: Shape.TextBox(
                                 Id: "columns", Name: "Columns",

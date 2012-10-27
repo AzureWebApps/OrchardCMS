@@ -47,15 +47,11 @@ namespace Orchard.Fields.Drivers {
                         : settings.AllowedExtensions.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
 
                 if (extensions.Any() && field.Url != null && !extensions.Any(x => field.Url.EndsWith(x, StringComparison.OrdinalIgnoreCase))) {
-                    updater.AddModelError("Url", T("The field {0} must be have one of these extensions: {1}", field.Name.CamelFriendly(), settings.AllowedExtensions));
+                    updater.AddModelError("Url", T("The field {0} must have one of these extensions: {1}", field.Name.CamelFriendly(), settings.AllowedExtensions));
                 }
 
                 if (settings.Required && String.IsNullOrWhiteSpace(field.Url)) {
                     updater.AddModelError("Url", T("The field {0} is mandatory", field.Name.CamelFriendly()));
-                }
-
-                if (!String.IsNullOrWhiteSpace(field.Url) && !_webSiteFolder.FileExists(field.Url)) {
-                    updater.AddModelError("Url", T("The media in {0} could not be found", field.Name.CamelFriendly()));
                 }
             }
 

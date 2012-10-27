@@ -102,37 +102,21 @@ namespace Orchard.Projections.Controllers {
             if (!Services.Authorizer.Authorize(StandardPermissions.SiteOwner, T("Not authorized to manage queries")))
                 return new HttpUnauthorizedResult();
 
-            var filter = _projectionManager.DescribeFilters().SelectMany(x => x.Descriptors).Where(x => x.Category == category && x.Type == type).FirstOrDefault();
+            var filter = _projectionManager.DescribeFilters().SelectMany(x => x.Descriptors).FirstOrDefault(x => x.Category == category && x.Type == type);
 
             if (filter == null) {
                 return HttpNotFound();
             }
 
-            // if there is no form to edit, save the filter and go back to the query
-            if (filter.Form == null) {
-                var group = _groupRepository.Get(id);
-
-                if (filterId == -1) {
-                    group.Filters.Add(
-                        new FilterRecord {
-                            Category = category, 
-                            Type = type, 
-                            Position = group.Filters.Count
-                    });
-                }
-
-                return RedirectToAction("Edit", "Admin", new { id = group.QueryPartRecord.Id });
-            }
-
             // build the form, and let external components alter it
-            var form = _formManager.Build(filter.Form);
+            var form = filter.Form == null ? null : _formManager.Build(filter.Form);
 
             string description = "";
 
             // bind form with existing values).
             if (filterId != -1) {
                 var group = _groupRepository.Get(id);
-                var filterRecord = group.Filters.Where(f => f.Id == filterId).FirstOrDefault();
+                var filterRecord = group.Filters.FirstOrDefault(f => f.Id == filterId);
                 if (filterRecord != null) {
                     description = filterRecord.Description;
                     var parameters = FormParametersHelper.FromString(filterRecord.State);

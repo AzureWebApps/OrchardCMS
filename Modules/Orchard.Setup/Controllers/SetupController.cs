@@ -17,6 +17,7 @@ namespace Orchard.Setup.Controllers {
     [ValidateInput(false), Themed]
     public class SetupController : Controller {
         private readonly IViewsBackgroundCompilation _viewsBackgroundCompilation;
+        private readonly ShellSettings _shellSettings;
         private readonly INotifier _notifier;
         private readonly ISetupService _setupService;
         private const string DefaultRecipe = "Default";
@@ -24,8 +25,10 @@ namespace Orchard.Setup.Controllers {
         public SetupController(
             INotifier notifier, 
             ISetupService setupService, 
-            IViewsBackgroundCompilation viewsBackgroundCompilation) {
+            IViewsBackgroundCompilation viewsBackgroundCompilation,
+            ShellSettings shellSettings) {
             _viewsBackgroundCompilation = viewsBackgroundCompilation;
+            _shellSettings = shellSettings;
             _notifier = notifier;
             _setupService = setupService;
 
@@ -71,18 +74,22 @@ namespace Orchard.Setup.Controllers {
         public ActionResult IndexPOST(SetupViewModel model) {
             var recipes = OrderRecipes(_setupService.Recipes());
 
-            //TODO: Couldn't get a custom ValidationAttribute to validate two properties
-            if (!model.DatabaseOptions && string.IsNullOrEmpty(model.DatabaseConnectionString))
-                ModelState.AddModelError("DatabaseConnectionString", T("A SQL connection string is required").Text);
+            // if no builtin provider, a connection string is mandatory
+            if (model.DatabaseProvider != SetupDatabaseType.Builtin && string.IsNullOrEmpty(model.DatabaseConnectionString))
+                ModelState.AddModelError("DatabaseConnectionString", T("A connection string is required").Text);
 
             if (!String.IsNullOrWhiteSpace(model.ConfirmPassword) && model.AdminPassword != model.ConfirmPassword ) {
                 ModelState.AddModelError("ConfirmPassword", T("Password confirmation must match").Text);
             }
 
-            if(!model.DatabaseOptions && !String.IsNullOrWhiteSpace(model.DatabaseTablePrefix)) {
+            if (model.DatabaseProvider != SetupDatabaseType.Builtin && !String.IsNullOrWhiteSpace(model.DatabaseTablePrefix)) {
                 model.DatabaseTablePrefix = model.DatabaseTablePrefix.Trim();
                 if(!Char.IsLetter(model.DatabaseTablePrefix[0])) {
                     ModelState.AddModelError("DatabaseTablePrefix", T("The table prefix must begin with a letter").Text);
+                }
+
+                if(model.DatabaseTablePrefix.Any(x => !Char.IsLetterOrDigit(x))) {
+                    ModelState.AddModelError("DatabaseTablePrefix", T("The table prefix must contain letters or digits").Text);
                 }
             }
             if (model.Recipe == null) {
@@ -104,11 +111,31 @@ namespace Orchard.Setup.Controllers {
             }
 
             try {
+                string providerName = null;
+
+                switch (model.DatabaseProvider)
+                {
+                    case SetupDatabaseType.Builtin:
+                        providerName = "SqlCe";
+                        break;
+
+                    case SetupDatabaseType.SqlServer:
+                        providerName = "SqlServer";
+                        break;
+
+                    case SetupDatabaseType.MySql:
+                        providerName = "MySql";
+                        break;
+
+                    default:
+                        throw new ApplicationException("Unknown database type: " + model.DatabaseProvider);
+                }
+
                 var setupContext = new SetupContext {
                     SiteName = model.SiteName,
                     AdminUsername = model.AdminUsername,
                     AdminPassword = model.AdminPassword,
-                    DatabaseProvider = model.DatabaseOptions ? "SqlCe" : "SqlServer",
+                    DatabaseProvider = providerName,
                     DatabaseConnectionString = model.DatabaseConnectionString,
                     DatabaseTablePrefix = model.DatabaseTablePrefix,
                     EnabledFeatures = null, // default list
@@ -123,7 +150,7 @@ namespace Orchard.Setup.Controllers {
                 _viewsBackgroundCompilation.Stop();
 
                 // redirect to the welcome page.
-                return Redirect("~/");
+                return Redirect("~/" + _shellSettings.RequestUrlPrefix);
             } catch (Exception ex) {
                 Logger.Error(ex, "Setup failed");
                 _notifier.Error(T("Setup failed: {0}", ex.Message));

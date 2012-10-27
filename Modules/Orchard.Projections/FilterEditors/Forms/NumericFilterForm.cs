@@ -62,7 +62,6 @@ namespace Orchard.Projections.FilterEditors.Forms {
 
                     _resourceManager.Value.Require("script", "jQuery");
                     _resourceManager.Value.Include("script", "~/Modules/Orchard.Projections/Scripts/numeric-editor-filter.js", "~/Modules/Orchard.Projections/Scripts/numeric-editor-filter.js");
-                    _resourceManager.Value.Include("stylesheet", "~/Modules/Orchard.Projections/Styles/numeric-editor-filter.css", "~/Modules/Orchard.Projections/Styles/numeric-editor-filter.css");
 
                     f._Operator.Add(new SelectListItem { Value = Convert.ToString(NumericOperator.LessThan), Text = T("Is less than").Text });
                     f._Operator.Add(new SelectListItem { Value = Convert.ToString(NumericOperator.LessThanEquals), Text = T("Is less than or equal to").Text });
@@ -96,7 +95,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
 
             switch (op) {
                 case NumericOperator.LessThan:
-                    return x => x.Lt(property, min);
+                    return x => x.Lt(property, max);
                 case NumericOperator.LessThanEquals:
                     return x => x.Le(property, max);
                 case NumericOperator.Equals:
@@ -107,7 +106,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
                 case NumericOperator.NotEquals:
                     return min == max ? (Action<IHqlExpressionFactory>)(x => x.Not(y => y.Eq(property, min))) : (y => y.Or(x => x.Lt(property, min), x => x.Gt(property, max)));
                 case NumericOperator.GreaterThan:
-                    return x => x.Gt(property, max);
+                    return x => x.Gt(property, min);
                 case NumericOperator.GreaterThanEquals:
                     return x => x.Ge(property, min);
                 case NumericOperator.Between:

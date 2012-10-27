@@ -23,10 +23,12 @@
 </fieldset>
 
     @* Render the dynamic form *@    
-<fieldset>
-    @DisplayChildren(Model.Form)
-</fieldset>
-    
+    if (Model.Form != null) {
+        <fieldset>
+            @DisplayChildren(Model.Form)
+        </fieldset>
+    }
+
     @Display.TokenHint()
 
 <fieldset>

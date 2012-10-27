@@ -41,7 +41,7 @@ namespace Orchard.Fields.Drivers {
         protected override DriverResult Editor(ContentPart part, Fields.EnumerationField field, IUpdateModel updater, dynamic shapeHelper) {
             if (updater.TryUpdateModel(field, GetPrefix(field, part), null, null)) {
                 var settings = field.PartFieldDefinition.Settings.GetModel<EnumerationFieldSettings>();
-                if (settings.Required && String.IsNullOrWhiteSpace(field.Value)) {
+                if (settings.Required && field.SelectedValues.Length == 0) {
                     updater.AddModelError(field.Name, T("The field {0} is mandatory", T(field.DisplayName)));
                 }
             }

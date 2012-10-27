@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Orchard.DisplayManagement;
 using Orchard.Forms.Services;
 using Orchard.Localization;
@@ -41,10 +42,11 @@ namespace Orchard.Projections.PropertyEditors.Forms {
 
         }
 
-        public static string FormatNumber(decimal number, dynamic state) {
+        public static string FormatNumber(decimal number, dynamic state, string culture) {
+            var cultureInfo = CultureInfo.CreateSpecificCulture(culture);
 
             string prefix = state.Prefix;
-            string result = number.ToString();
+            string result = number.ToString(cultureInfo);
             
             if(!String.IsNullOrEmpty(prefix)) {
                 result = prefix + result;

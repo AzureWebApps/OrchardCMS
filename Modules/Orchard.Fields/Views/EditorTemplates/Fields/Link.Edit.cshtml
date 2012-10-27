@@ -20,7 +20,7 @@
     <span class="hint">@settings.Hint</span>
 
     <div class="editor-label">
-        <label for="@Html.FieldIdFor(m => m.Value)">@T("Url")</label>
+        <label for="@Html.FieldIdFor(m => m.Value)" @if(settings.Required) { <text>class="required"</text> }>@T("Url")</label>
     </div>
     <div class="editor-field">
         @Html.TextBoxFor(m => m.Value, new { @class = "large text" })
@@ -28,7 +28,7 @@
     </div>
     @if (settings.LinkTextMode == LinkTextMode.Optional || settings.LinkTextMode == LinkTextMode.Required) {
         <div class="editor-label">
-            <label for="@Html.FieldIdFor(m => m.Text)">@T("Text")</label>
+            <label for="@Html.FieldIdFor(m => m.Text)" @if(settings.LinkTextMode == LinkTextMode.Required) { <text>class="required"</text> }>@T("Text")</label>
         </div>
         <div class="editor-field">
             @Html.TextBoxFor(m => m.Text, new {@class = "textMedium"})

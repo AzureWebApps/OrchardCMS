@@ -163,7 +163,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
 
             switch (op) {
                 case DateTimeOperator.LessThan:
-                    return x => x.Lt(property, minValue);
+                    return x => x.Lt(property, maxValue);
                 case DateTimeOperator.LessThanEquals:
                     return x => x.Le(property, maxValue);
                 case DateTimeOperator.Equals:
@@ -177,7 +177,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
                     }
                     return y => y.Or(x => x.Lt(property, minValue), x => x.Gt(property, maxValue));
                 case DateTimeOperator.GreaterThan:
-                    return x => x.Gt(property, maxValue);
+                    return x => x.Gt(property, minValue);
                 case DateTimeOperator.GreaterThanEquals:
                     return x => x.Ge(property, minValue);
                 case DateTimeOperator.Between:
@@ -198,7 +198,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
 
             return DateTime.Parse(
                 String.Format("{0}-{1}-{2} {3}:{4}:{5}",
-                              match.Groups["year"].Success ? match.Groups["year"].Value : "0001",
+                              match.Groups["year"].Success ? match.Groups["year"].Value : "1980",
                               match.Groups["month"].Success ? match.Groups["month"].Value : "01",
                               match.Groups["day"].Success ? match.Groups["day"].Value : "01",
                               match.Groups["hour"].Success ? match.Groups["hour"].Value : "00",
@@ -280,7 +280,7 @@ namespace Orchard.Projections.FilterEditors.Forms {
             string year, month;
             return DateTime.Parse(
                 String.Format("{0}-{1}-{2} {3}:{4}:{5}",
-                              year = match.Groups["year"].Success ? match.Groups["year"].Value : "2999",
+                              year = match.Groups["year"].Success ? match.Groups["year"].Value : "2099",
                               month = match.Groups["month"].Success ? match.Groups["month"].Value : "12",
                               match.Groups["day"].Success ? match.Groups["day"].Value : DateTime.DaysInMonth(Int32.Parse(year), Int32.Parse(month)).ToString(),
                               match.Groups["hour"].Success ? match.Groups["hour"].Value : "23",

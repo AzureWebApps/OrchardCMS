@@ -89,8 +89,19 @@ namespace Orchard.Projections.Drivers {
 
             var pager = new Pager(Services.WorkContext.CurrentSite, page, pageSize);
 
+            var pagerShape = shapeHelper.Pager(pager)
+                .ContentPart(part)
+                .PagerId(pageKey);
+
             return Combined(
-                ContentShape("Parts_ProjectionPart", shape => {
+                ContentShape("Parts_ProjectionPart_Pager", shape => {
+                    if(!part.Record.DisplayPager) {
+                        return null;
+                    }
+
+                    return pagerShape;
+                }),
+                ContentShape("Parts_ProjectionPart_List", shape => {
 
                     // generates a link to the RSS feed for this term
                     var metaData = Services.ContentManager.GetItemMetadata(part.ContentItem);
@@ -107,10 +118,6 @@ namespace Orchard.Projections.Drivers {
 
                     LayoutDescriptor layoutDescriptor = layout == null ? null : _projectionManager.DescribeLayouts().SelectMany(x => x.Descriptors).FirstOrDefault(x => x.Category == layout.Category && x.Type == layout.Type);
 
-                    var pagerShape = shapeHelper.Pager(pager)
-                        .ContentPart(part)
-                        .PagerId(pageKey);
-
                     // create pager shape
                     if (part.Record.DisplayPager) {
                         var contentItemsCount = _projectionManager.GetCount(query.Id);
@@ -123,7 +130,7 @@ namespace Orchard.Projections.Drivers {
                         var contentShapes = contentItems.Select(item => Services.ContentManager.BuildDisplay(item, "Summary"));
                         list.AddRange(contentShapes);
 
-                        return Services.New.Parts_ProjectionPart().List(list).Pager(pagerShape);
+                        return list;
                     }
 
                     var tokens = new Dictionary<string, object> { { "Content", part.ContentItem } };
@@ -200,9 +207,7 @@ namespace Orchard.Projections.Drivers {
                             list.Add(Services.New.LayoutGroup(Key: new MvcHtmlString(group.Key), List: localResult));
                         }
 
-                        return Services.New.Parts_ProjectionPart()
-                            .List(list)
-                            .Pager(pagerShape);
+                        return list;
                     }
 
 
@@ -211,9 +216,7 @@ namespace Orchard.Projections.Drivers {
                     // add the Context to the shape
                     layoutResult.Context(renderLayoutContext);
 
-                    return Services.New.Parts_ProjectionPart()
-                            .List(layoutResult)
-                            .Pager(pagerShape);
+                    return layoutResult;
                 }));
         }
 

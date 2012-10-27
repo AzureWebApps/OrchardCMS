@@ -5,6 +5,11 @@ using Orchard.Projections.PropertyEditors.Forms;
 
 namespace Orchard.Projections.PropertyEditors {
     public class NumericPropertyEditor : IPropertyEditor {
+        private readonly IWorkContextAccessor _workContextAccessor;
+
+        public NumericPropertyEditor(IWorkContextAccessor workContextAccessor) {
+            _workContextAccessor = workContextAccessor;
+        }
 
         public bool CanHandle(Type type) {
             return new[] {
@@ -27,7 +32,8 @@ namespace Orchard.Projections.PropertyEditors {
         }
 
         public dynamic Format(dynamic display, object value, dynamic formState) {
-            return NumericPropertyForm.FormatNumber(Convert.ToDecimal(value), formState);
+            var culture = _workContextAccessor.GetContext().CurrentCulture;
+            return NumericPropertyForm.FormatNumber(Convert.ToDecimal(value, new System.Globalization.CultureInfo(culture)), formState, culture);
         }
     }
 }

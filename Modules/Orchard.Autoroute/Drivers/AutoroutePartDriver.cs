@@ -9,6 +9,8 @@ using Orchard.ContentManagement.Drivers;
 using Orchard.Autoroute.ViewModels;
 using Orchard.Autoroute.Settings;
 using Orchard.Localization;
+using Orchard.Security;
+using Orchard.UI.Notify;
 using Orchard.Utility.Extensions;
 
 namespace Orchard.Autoroute.Drivers {
@@ -16,14 +18,20 @@ namespace Orchard.Autoroute.Drivers {
         private readonly IAliasService _aliasService;
         private readonly IContentManager _contentManager;
         private readonly IAutorouteService _autorouteService;
+        private readonly IAuthorizer _authorizer;
+        private readonly INotifier _notifier;
 
         public AutoroutePartDriver(
             IAliasService aliasService, 
             IContentManager contentManager,
-            IAutorouteService autorouteService) {
+            IAutorouteService autorouteService,
+            IAuthorizer authorizer,
+            INotifier notifier) {
             _aliasService = aliasService;
             _contentManager = contentManager;
             _autorouteService = autorouteService;
+            _authorizer = authorizer;
+            _notifier = notifier;
 
             T = NullLocalizer.Instance;
         }
@@ -46,6 +54,8 @@ namespace Orchard.Autoroute.Drivers {
                 settings.AutomaticAdjustmentOnEdit = false;
                 settings.DefaultPatternIndex = 0;
                 settings.Patterns = new List<RoutePattern> {new RoutePattern {Name = "Title", Description = "my-title", Pattern = "{Content.Slug}"}};
+
+                _notifier.Warning(T("No route patterns are currently defined for this Content Type. If you don't set one in the settings, a default one will be used."));
             }
 
             var viewModel = new AutoroutePartEditViewModel {
@@ -88,14 +98,14 @@ namespace Orchard.Autoroute.Drivers {
                     if (path.StartsWith(".") || path.EndsWith("."))
                         updater.AddModelError("CurrentUrl", T("The \".\" can't be used at either end of the permalink."));
                     else
-                        updater.AddModelError("CurrentUrl", T("Please do not use any of the following characters in your permalink: \":\", \"?\", \"#\", \"[\", \"]\", \"@\", \"!\", \"$\", \"&\", \"'\", \"(\", \")\", \"*\", \"+\", \",\", \";\", \"=\", \", \"<\", \">\", \"\\\". No spaces are allowed (please use dashes or underscores instead)."));
+                        updater.AddModelError("CurrentUrl", T("Please do not use any of the following characters in your permalink: \":\", \"?\", \"#\", \"[\", \"]\", \"@\", \"!\", \"$\", \"&\", \"'\", \"(\", \")\", \"*\", \"+\", \",\", \";\", \"=\", \", \"<\", \">\", \"\\\", \"|\". No spaces are allowed (please use dashes or underscores instead)."));
                 }
 
                 // if CurrentUrl is set, the handler won't try to create an alias for it
                 // but instead keep the value
 
                 // if home page is requested, use "/" to have the handler create a homepage alias
-                if(viewModel.PromoteToHomePage) {
+                if(_authorizer.Authorize(Permissions.SetHomePage) && viewModel.PromoteToHomePage) {
                     part.DisplayAlias = "/";
                 }
             }

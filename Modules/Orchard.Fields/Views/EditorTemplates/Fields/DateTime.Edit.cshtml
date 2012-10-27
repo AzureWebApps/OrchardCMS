@@ -11,7 +11,7 @@
 }
 
     <fieldset>
-        <label for="@Html.FieldIdFor(m => Model.Date)">@Model.Name</label>
+        <label for="@Html.FieldIdFor(m => Model.Date)" @if(Model.Required) { <text>class="required"</text> }>@Model.Name</label>
         
         @if ( Model.ShowDate ) {
         <label class="forpicker" for="@Html.FieldIdFor(m => Model.Date)">@T("Date")</label>
@@ -36,6 +36,7 @@
 <script type="text/javascript">    
 //<![CDATA[
     $(function () {
+
         $("#@Html.FieldIdFor(m => Model.Date)").datepicker({ showAnim: "" });
         @if(Model.ShowTime) {
             <text>$("#@Html.FieldIdFor(m => Model.Time)").timepicker({ stepMinute: 5 });</text>

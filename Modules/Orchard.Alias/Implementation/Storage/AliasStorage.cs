@@ -11,6 +11,7 @@ namespace Orchard.Alias.Implementation.Storage {
         void Set(string path, IDictionary<string, string> routeValues, string source);
         IDictionary<string, string> Get(string aliasPath);
         void Remove(string path);
+        void Remove(string path, string aliasSource);
         void RemoveBySource(string aliasSource);
         IEnumerable<Tuple<string, string, IDictionary<string, string>, string>> List();
         IEnumerable<Tuple<string, string, IDictionary<string, string>, string>> List(string sourceStartsWith);
@@ -91,6 +92,20 @@ namespace Orchard.Alias.Implementation.Storage {
             }
 
             foreach (var aliasRecord in _aliasRepository.Fetch(r => r.Path == path)) {
+                _aliasRepository.Delete(aliasRecord);
+                // Bulk updates might go wrong if we don't flush
+                _aliasRepository.Flush();
+                var dict = ToDictionary(aliasRecord);
+                _aliasHolder.RemoveAlias(new AliasInfo() { Path = dict.Item1, Area = dict.Item2, RouteValues = dict.Item3 });
+            }
+        }
+        public void Remove(string path, string aliasSource) {
+
+            if (path == null) {
+                throw new ArgumentNullException("path");
+            }
+
+            foreach (var aliasRecord in _aliasRepository.Fetch(r => r.Path == path && r.Source == aliasSource)) {
                 _aliasRepository.Delete(aliasRecord);
                 // Bulk updates might go wrong if we don't flush
                 _aliasRepository.Flush();

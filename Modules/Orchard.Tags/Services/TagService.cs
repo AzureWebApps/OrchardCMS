@@ -91,11 +91,7 @@ namespace Orchard.Tags.Services {
             var tagRecord = GetTagByName(tagName);
 
             // new tag name already existing => merge
-            if (tagRecord != null) {
-                // If updating ourselves, ignore
-                if (tagRecord.Id == tagId)
-                    return;
-
+            if (tagRecord != null && tagRecord.Id != tagId) {
                 var tagsContentItems = _contentTagRepository.Fetch(x => x.TagRecord.Id == tagId);
 
                 // get contentItems already tagged with the existing one
@@ -146,7 +142,10 @@ namespace Orchard.Tags.Services {
         }
 
         public int GetTaggedContentItemCount(int tagId, VersionOptions options) {
-            return GetTaggedContentItems(tagId, options).Count();
+            return _orchardServices.ContentManager
+                .Query<TagsPart, TagsPartRecord>()
+                .Where(tpr => tpr.Tags.Any(tr => tr.TagRecord.Id == tagId))
+                .Count();
         }
 
         private void TagContentItem(TagsPartRecord tagsPartRecord, string tagName) {

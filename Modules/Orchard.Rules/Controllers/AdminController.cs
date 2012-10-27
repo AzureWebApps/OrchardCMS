@@ -22,7 +22,6 @@ namespace Orchard.Rules.Controllers {
         private readonly ISiteService _siteService;
         private readonly IRulesManager _rulesManager;
         private readonly IRulesServices _rulesServices;
-        private readonly IRepository<RuleRecord> _repository;
 
         public AdminController(
             IOrchardServices services,
@@ -34,7 +33,6 @@ namespace Orchard.Rules.Controllers {
             _siteService = siteService;
             _rulesManager = rulesManager;
             _rulesServices = rulesServices;
-            _repository = repository;
             Services = services;
 
             T = NullLocalizer.Instance;
@@ -55,7 +53,7 @@ namespace Orchard.Rules.Controllers {
             if (options == null)
                 options = new RulesIndexOptions();
 
-            var rules = _repository.Table;
+            var rules = _rulesServices.GetRules();
 
             switch (options.Filter) {
                 case RulesFilter.Disabled:
@@ -119,21 +117,17 @@ namespace Orchard.Rules.Controllers {
                     break;
                 case RulesBulkAction.Enable:
                     foreach (var entry in checkedEntries) {
-                        _repository.Get(entry.RuleId).Enabled = true;
+                        _rulesServices.GetRule(entry.RuleId).Enabled = true;
                     }
                     break;
                 case RulesBulkAction.Disable:
                     foreach (var entry in checkedEntries) {
-                        _repository.Get(entry.RuleId).Enabled = false;
+                        _rulesServices.GetRule(entry.RuleId).Enabled = false;
                     }
                     break;
                 case RulesBulkAction.Delete:
                     foreach (var entry in checkedEntries) {
-                        var rule = _rulesServices.GetRule(entry.RuleId);
-
-                        if (rule != null) {
-                            _repository.Delete(rule);
-                        }
+                        _rulesServices.DeleteRule(entry.RuleId);
                     }
                     break;
             }
@@ -279,7 +273,7 @@ namespace Orchard.Rules.Controllers {
             var rule = _rulesServices.GetRule(id);
 
             if (rule != null) {
-                _repository.Delete(rule);
+                _rulesServices.DeleteRule(id);
                 Services.Notifier.Information(T("Rule {0} deleted", rule.Name));
             }
 

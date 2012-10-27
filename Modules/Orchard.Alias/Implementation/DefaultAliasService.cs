@@ -36,19 +36,29 @@ namespace Orchard.Alias.Implementation {
 
         public void Set(string aliasPath, string routePath, string aliasSource) {
             _aliasStorage.Set(
-                aliasPath.Trim('/'),
+                aliasPath.TrimStart('/'),
                 ToDictionary(routePath),
                 aliasSource);
         }
 
         public void Delete(string aliasPath) {
-            
-            if(aliasPath == null) {
+
+            if (aliasPath == null) {
                 aliasPath = String.Empty;
             }
 
             _aliasStorage.Remove(aliasPath);
         }
+
+        public void Delete(string aliasPath, string aliasSource) {
+
+            if (aliasPath == null) {
+                aliasPath = String.Empty;
+            }
+
+            _aliasStorage.Remove(aliasPath, aliasSource);
+        }
+
         public void DeleteBySource(string aliasSource) {
             _aliasStorage.RemoveBySource(aliasSource);
         }
@@ -59,7 +69,7 @@ namespace Orchard.Alias.Implementation {
 
         public void Replace(string aliasPath, RouteValueDictionary routeValues, string aliasSource) {
             foreach (var lookup in Lookup(routeValues).Where(path => path != aliasPath)) {
-                Delete(lookup);
+                Delete(lookup, aliasSource);
             }
             Set(aliasPath, routeValues, aliasSource);
         }

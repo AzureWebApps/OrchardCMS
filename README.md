@@ -1,4 +1,4 @@
-# Orchard CMS 1.4.2
+# Orchard CMS 1.6
 
 Orchard is a free, open source, community-focused project aimed at delivering applications and reusable 
 components on the ASP.NET platform. It will create shared components for building ASP.NET applications and 

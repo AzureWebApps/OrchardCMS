@@ -20,6 +20,10 @@ namespace Orchard.Tokens.Providers {
         }
 
         public void Evaluate(EvaluateContext context) {
+            if (_workContextAccessor.GetContext().HttpContext == null) {
+                return;
+            }
+
             context.For("Request", _workContextAccessor.GetContext().HttpContext.Request)
                 .Token(
                     token => token.StartsWith("QueryString:", StringComparison.OrdinalIgnoreCase) ? token.Substring("QueryString:".Length) : null,

@@ -62,19 +62,21 @@ namespace Orchard.Projections.PropertyEditors.Forms {
         public static dynamic FormatDateTime(dynamic display, DateTime dateTime, dynamic state, string culture) {
 
             string format = state.Format;
+            var cultureInfo = CultureInfo.CreateSpecificCulture(culture);
+
             switch(format) {
                 case "ago":
                     return display.DateTimeRelative(dateTimeUtc: dateTime);
                 case "day" :
-                    return dateTime.Day.ToString();
+                    return dateTime.Day.ToString(cultureInfo);
                 case "month" :
-                    return dateTime.Month.ToString();
+                    return dateTime.Month.ToString(cultureInfo);
                 case "year" :
-                    return dateTime.Year.ToString();
+                    return dateTime.Year.ToString(cultureInfo);
                 case "dayOfYear":
-                    return dateTime.DayOfYear.ToString();
+                    return dateTime.DayOfYear.ToString(cultureInfo);
                 default:
-                    return dateTime.ToString(format, CultureInfo.CreateSpecificCulture(culture));
+                    return dateTime.ToString(format, cultureInfo);
             }
         }
     }

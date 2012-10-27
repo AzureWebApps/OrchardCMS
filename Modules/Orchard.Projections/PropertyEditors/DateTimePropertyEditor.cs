@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Linq;
-using Orchard.Localization.Services;
 using Orchard.Projections.ModelBinding;
 using Orchard.Projections.PropertyEditors.Forms;
 
 namespace Orchard.Projections.PropertyEditors {
     public class DateTimePropertyEditor : IPropertyEditor {
-        private readonly Lazy<string> _culture;
+        private readonly IWorkContextAccessor _workContextAccessor;
 
         public DateTimePropertyEditor(
-            ICultureSelector cultureSelector,
             IWorkContextAccessor workContextAccessor) {
-                _culture = new Lazy<string>(() => cultureSelector.GetCulture(workContextAccessor.GetContext().HttpContext).CultureName);
+            _workContextAccessor = workContextAccessor;
         }
+
         public bool CanHandle(Type type) {
             return new[] { typeof(DateTime), typeof(DateTime?) }.Contains(type);
         }
@@ -22,7 +21,8 @@ namespace Orchard.Projections.PropertyEditors {
         }
 
         public dynamic Format(dynamic display, object value, dynamic formState) {
-            return DateTimePropertyForm.FormatDateTime(display, Convert.ToDateTime(value), formState, _culture.Value);
+            var culture = _workContextAccessor.GetContext().CurrentCulture;
+            return DateTimePropertyForm.FormatDateTime(display, Convert.ToDateTime(value, new System.Globalization.CultureInfo(culture)), formState, culture);
         }
     }
 }

@@ -130,8 +130,7 @@ namespace Orchard.Rules.Controllers {
 
         private void AddSubmitButton(dynamic form) {
             var viewContext = new ViewContext { HttpContext = HttpContext, Controller = this };
-            var siteSalt = Services.WorkContext.CurrentSite.SiteSalt;
-            var token = new HtmlHelper(viewContext, new ViewDataContainer()).AntiForgeryToken(siteSalt);
+            var token = new HtmlHelper(viewContext, new ViewDataContainer()).AntiForgeryToken();
 
             // add a submit button to the form
             form

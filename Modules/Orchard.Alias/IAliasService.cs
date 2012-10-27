@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Web.Routing;
 
-namespace Orchard.Alias
-{
-    public interface IAliasService : IDependency
-    {
+namespace Orchard.Alias {
+    public interface IAliasService : IDependency {
         RouteValueDictionary Get(string aliasPath);
         void Set(string aliasPath, RouteValueDictionary routeValues, string aliasSource);
         void Set(string aliasPath, string routePath, string aliasSource);
         void Delete(string aliasPath);
+        void Delete(string aliasPath, string aliasSource);
         /// <summary>
         /// Delete Alias from a particular source
         /// </summary>
@@ -23,7 +22,7 @@ namespace Orchard.Alias
         void Replace(string aliasPath, string routePath, string aliasSource);
 
         IEnumerable<Tuple<string, RouteValueDictionary>> List();
-        IEnumerable<Tuple<string, RouteValueDictionary,string>> List(string sourceStartsWith);
+        IEnumerable<Tuple<string, RouteValueDictionary, string>> List(string sourceStartsWith);
         IEnumerable<VirtualPathData> LookupVirtualPaths(RouteValueDictionary routeValues, System.Web.HttpContextBase HttpContext);
 
     }

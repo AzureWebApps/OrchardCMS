@@ -160,7 +160,7 @@ namespace Orchard.Projections.Tests.Services {
 
         [Test]
         public void CommonDataTypesShouldBeSerialized() {
-            var datetime = new DateTime(1980, 1, 1, 12, 0, 0);
+            var datetime = new DateTime(1980, 1, 1, 12, 1, 1, 499);
 
             Set("string", "one");
             Set("int1", int.MaxValue);
